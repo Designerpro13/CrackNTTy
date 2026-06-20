@@ -1,4 +1,4 @@
-import { ParsedOutput } from '../schemas/types'
+import type { ParsedOutput } from '../schemas/types'
 
 /**
  * Parse nmap XML output into structured data.

@@ -1,4 +1,4 @@
-import { ToolSchema } from './types'
+import type { ToolSchema } from './types'
 
 export const nmapSchema: ToolSchema = {
   id: 'nmap',

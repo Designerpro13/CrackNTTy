@@ -1,4 +1,4 @@
-import { ToolSchema, ArgDef } from './types'
+import type { ToolSchema, ArgDef } from './types'
 import { nmapSchema } from './nmap'
 import { gobusterSchema } from './gobuster'
 import { niktoSchema } from './nikto'

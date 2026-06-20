@@ -7,7 +7,7 @@ import Targets from './views/Targets'
 const views = ['Arsenal', 'Operation', 'CLI-Logs', 'Targets'] as const
 type View = (typeof views)[number]
 
-const viewComponents: Record<View, () => JSX.Element> = {
+const viewComponents: Record<View, () => React.JSX.Element> = {
   Arsenal,
   Operation,
   'CLI-Logs': CliLogs,

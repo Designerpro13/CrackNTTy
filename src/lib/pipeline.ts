@@ -1,4 +1,4 @@
-import { Edge, Node } from '@xyflow/react'
+import type { Edge, Node } from '@xyflow/react'
 
 /**
  * Topological sort of nodes based on edges (Kahn's algorithm).

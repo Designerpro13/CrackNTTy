@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { invoke } from '@tauri-apps/api/core'
 import { toolSchemas } from '../schemas'
-import { Category, ToolStatus } from '../schemas/types'
+import type { Category, ToolStatus } from '../schemas/types'
 import ToolCard from '../components/ToolCard'
 
 type FilterCategory = 'All Tools' | Category
