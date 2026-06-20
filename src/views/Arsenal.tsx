@@ -67,19 +67,24 @@ export default function Arsenal() {
       <div className="flex items-center gap-4 mb-6">
         {/* Category pills */}
         <div className="flex gap-2">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setFilter(cat)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                filter === cat
-                  ? 'bg-blue-500/20 text-blue-400 border border-blue-500/50'
-                  : 'bg-slate-800 text-slate-400 border border-slate-700 hover:text-slate-300 hover:border-slate-600'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+          {categories.map((cat) => {
+            const count = cat === 'All Tools'
+              ? toolSchemas.length
+              : toolSchemas.filter(t => t.category === cat).length
+            return (
+              <button
+                key={cat}
+                onClick={() => setFilter(cat)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                  filter === cat
+                    ? 'bg-blue-500/20 text-blue-400 border border-blue-500/50'
+                    : 'bg-slate-800 text-slate-400 border border-slate-700 hover:text-slate-300 hover:border-slate-600'
+                }`}
+              >
+                {cat} ({count})
+              </button>
+            )
+          })}
         </div>
 
         {/* Search */}
