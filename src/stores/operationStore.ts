@@ -10,6 +10,10 @@ import type {
   OnEdgesChange,
 } from '@xyflow/react'
 import type { ToolSchema } from '../schemas/types'
+import { topologicalSort } from '../lib/pipeline'
+import { buildCommand } from '../schemas/index'
+import { invoke } from '@tauri-apps/api/core'
+import { listen } from '@tauri-apps/api/event'
 
 // ============ Types ============
 
@@ -40,6 +44,7 @@ interface OperationState {
   addEdge: (edge: Edge) => void
   updateNodeStatus: (nodeId: string, status: ToolNodeData['status']) => void
   setOperationStatus: (status: OperationStatus) => void
+  executeOperation: () => Promise<void>
 }
 
 // ============ Store Implementation ============
@@ -103,4 +108,65 @@ export const useOperationStore = create<OperationState>((set, get) => ({
   },
 
   setOperationStatus: (status) => set({ status }),
+
+  executeOperation: async () => {
+    const { nodes, edges } = get()
+
+    // Set operation status to EXECUTING
+    set({ status: 'EXECUTING' })
+
+    // Run topological sort to determine execution order
+    let order: string[]
+    try {
+      order = topologicalSort(nodes, edges)
+    } catch {
+      // Cycle detected — reset status and stop
+      set({ status: 'IDLE' })
+      return
+    }
+
+    // Iterate nodes in topological order
+    for (const nodeId of order) {
+      const node = get().nodes.find((n) => n.id === nodeId)
+      if (!node) continue
+
+      // Set node status to running
+      get().updateNodeStatus(nodeId, 'running')
+
+      // Build the command from the node's schema and config
+      const { command, args } = buildCommand(node.data.schema, node.data.config)
+
+      // Set up listener BEFORE invoking so we don't miss events
+      const status = await new Promise<'completed' | 'failed'>((resolve) => {
+        let unlisten: (() => void) | null = null
+
+        listen<{ status: string; exit_code: number | null }>(
+          `tool-status-${nodeId}`,
+          (event) => {
+            if (event.payload.status === 'completed' || event.payload.status === 'failed') {
+              unlisten?.()
+              resolve(event.payload.status as 'completed' | 'failed')
+            }
+          },
+        ).then((unlistenFn) => {
+          unlisten = unlistenFn
+        })
+
+        // Invoke the Tauri execute_tool command
+        invoke('execute_tool', { id: nodeId, command, args })
+      })
+
+      if (status === 'completed') {
+        get().updateNodeStatus(nodeId, 'completed')
+      } else {
+        // Node failed — mark it, reset operation, stop
+        get().updateNodeStatus(nodeId, 'failed')
+        set({ status: 'IDLE' })
+        return
+      }
+    }
+
+    // All nodes completed successfully
+    set({ status: 'IDLE' })
+  },
 }))
