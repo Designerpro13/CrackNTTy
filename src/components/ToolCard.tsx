@@ -1,4 +1,4 @@
-import { ToolSchema, ToolStatus } from '../schemas/types'
+import type { ToolSchema, ToolStatus } from '../schemas/types'
 
 interface ToolCardProps {
   schema: ToolSchema
