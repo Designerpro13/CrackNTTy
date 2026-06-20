@@ -1,0 +1,19 @@
+{
+  "enabled": true,
+  "name": "Auto Git Commit",
+  "description": "Automatically creates git commits after coding tasks are completed. Commits are made for groups of related file changes, major logic updates, or security fixes with descriptive commit messages.",
+  "version": "1",
+  "when": {
+    "type": "postToolUse",
+    "toolTypes": [
+      "write",
+      "Commit to work"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "After writing files, check if there are meaningful changes that should be committed. If the changes represent a logical unit of work (a few related files changed, a major logic change, or a security fix), stage the relevant files and create a git commit with a clear, concise commit message describing what was done. Use conventional commit format (e.g., feat:, fix:, refactor:, security:). Do NOT commit after every single small edit — wait until there's a coherent set of changes worth committing. Do not push to remote."
+  },
+  "workspaceFolderName": "crackntty",
+  "shortName": "auto-git-commit"
+}
