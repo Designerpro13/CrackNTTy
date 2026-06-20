@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Handle, Position, type NodeProps, type Node } from '@xyflow/react'
 import type { ToolNodeData } from '../stores/operationStore'
+import { useOperationStore } from '../stores/operationStore'
 import type { Category } from '../schemas/types'
 
 const categoryDisplayMap: Record<Category, string> = {
@@ -16,8 +17,37 @@ const statusDotClass: Record<ToolNodeData['status'], string> = {
   failed: 'bg-red-500',
 }
 
-export function ToolNode({ data }: NodeProps<Node<ToolNodeData>>) {
+export function ToolNode({ id, data }: NodeProps<Node<ToolNodeData>>) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!menuOpen) return
+
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as HTMLElement)) {
+        setMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [menuOpen])
+
+  function handleDelete() {
+    useOperationStore.getState().removeNode(id)
+    setMenuOpen(false)
+  }
+
+  function handleConfigure() {
+    console.log('Configure node:', id)
+    setMenuOpen(false)
+  }
+
+  function handleDuplicate() {
+    useOperationStore.getState().duplicateNode(id)
+    setMenuOpen(false)
+  }
 
   return (
     <div className="relative bg-[#1a1f2e] border border-slate-700 rounded-lg min-w-[180px] shadow px-3 py-2.5">
@@ -48,10 +78,33 @@ export function ToolNode({ data }: NodeProps<Node<ToolNodeData>>) {
         <span className={`w-2 h-2 rounded-full ${statusDotClass[data.status]}`} />
       </div>
 
-      {/* Dropdown placeholder — menu actions implemented in task 4.2 */}
+      {/* Context menu */}
       {menuOpen && (
-        <div className="absolute top-8 right-2 bg-[#1a1f2e] border border-slate-700 rounded shadow-lg z-10 py-1 min-w-[120px]">
-          {/* Menu items will be added in task 4.2 */}
+        <div
+          ref={menuRef}
+          className="absolute top-8 right-2 bg-[#1a1f2e] border border-slate-700 rounded shadow-lg z-10 py-1 min-w-[120px]"
+        >
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="w-full text-left px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-700 hover:text-slate-100"
+          >
+            Delete
+          </button>
+          <button
+            type="button"
+            onClick={handleConfigure}
+            className="w-full text-left px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-700 hover:text-slate-100"
+          >
+            Configure
+          </button>
+          <button
+            type="button"
+            onClick={handleDuplicate}
+            className="w-full text-left px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-700 hover:text-slate-100"
+          >
+            Duplicate
+          </button>
         </div>
       )}
 
