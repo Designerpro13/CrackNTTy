@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, type DragEvent } from 'react'
+import { useState, useEffect, useCallback, useMemo, type DragEvent } from 'react'
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -28,6 +28,16 @@ function OperationInner() {
     useOperationStore()
 
   const reactFlowInstance = useReactFlow()
+
+  // Derive animated edges based on operation status
+  const animatedEdges = useMemo(
+    () =>
+      edges.map((edge) => ({
+        ...edge,
+        animated: status === 'EXECUTING',
+      })),
+    [edges, status],
+  )
 
   // Check tool availability on mount
   useEffect(() => {
@@ -106,7 +116,7 @@ function OperationInner() {
       <div className="flex-1 relative">
         <ReactFlow
           nodes={nodes}
-          edges={edges}
+          edges={animatedEdges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={handleConnect}
