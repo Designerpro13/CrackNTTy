@@ -1,10 +1,12 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, type DragEvent } from 'react'
 import {
   ReactFlow,
+  ReactFlowProvider,
   Background,
   Controls,
   MiniMap,
   BackgroundVariant,
+  useReactFlow,
   type Connection,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
@@ -13,17 +15,19 @@ import { ToolSidebar } from '../components/ToolSidebar'
 import { ToolNode } from '../components/ToolNode'
 import OperationControls from '../components/OperationControls'
 import { useOperationStore } from '../stores/operationStore'
-import { toolSchemas } from '../schemas'
+import { toolSchemas, toolMap } from '../schemas'
 import type { ToolSchema } from '../schemas/types'
 import { invoke } from '@tauri-apps/api/core'
 
 const nodeTypes = { toolNode: ToolNode }
 
-export default function Operation() {
+function OperationInner() {
   const [availableTools, setAvailableTools] = useState<ToolSchema[]>([])
 
-  const { nodes, edges, onNodesChange, onEdgesChange, addEdge, status } =
+  const { nodes, edges, onNodesChange, onEdgesChange, addEdge, addNode, status } =
     useOperationStore()
+
+  const reactFlowInstance = useReactFlow()
 
   // Check tool availability on mount
   useEffect(() => {
@@ -63,6 +67,36 @@ export default function Operation() {
     [addEdge],
   )
 
+  const handleDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'move'
+  }, [])
+
+  const handleDrop = useCallback(
+    (event: DragEvent<HTMLDivElement>) => {
+      event.preventDefault()
+
+      const toolId = event.dataTransfer.getData('application/crackntty-tool')
+      if (!toolId) return
+
+      const schema = toolMap[toolId]
+      if (!schema) return
+
+      const position = reactFlowInstance.screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      })
+
+      addNode({
+        id: crypto.randomUUID(),
+        type: 'toolNode',
+        position,
+        data: { toolId, schema, config: {}, status: 'idle' },
+      })
+    },
+    [reactFlowInstance, addNode],
+  )
+
   return (
     <div className="flex flex-row h-full w-full">
       {/* Left sidebar */}
@@ -76,6 +110,8 @@ export default function Operation() {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={handleConnect}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
           nodeTypes={nodeTypes}
           fitView
         >
@@ -100,5 +136,13 @@ export default function Operation() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function Operation() {
+  return (
+    <ReactFlowProvider>
+      <OperationInner />
+    </ReactFlowProvider>
   )
 }
