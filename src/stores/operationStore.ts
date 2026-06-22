@@ -43,6 +43,7 @@ interface OperationState {
   duplicateNode: (nodeId: string) => void
   addEdge: (edge: Edge) => void
   updateNodeStatus: (nodeId: string, status: ToolNodeData['status']) => void
+  updateNodeConfig: (nodeId: string, argId: string, value: string | boolean) => void
   setOperationStatus: (status: OperationStatus) => void
   executeOperation: () => Promise<void>
 }
@@ -103,6 +104,16 @@ export const useOperationStore = create<OperationState>((set, get) => ({
     set((s) => ({
       nodes: s.nodes.map((n) =>
         n.id === nodeId ? { ...n, data: { ...n.data, status } } : n,
+      ),
+    }))
+  },
+
+  updateNodeConfig: (nodeId, argId, value) => {
+    set((s) => ({
+      nodes: s.nodes.map((n) =>
+        n.id === nodeId
+          ? { ...n, data: { ...n.data, config: { ...n.data.config, [argId]: value } } }
+          : n,
       ),
     }))
   },
