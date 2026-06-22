@@ -14,6 +14,7 @@ import '@xyflow/react/dist/style.css'
 import { ToolSidebar } from '../components/ToolSidebar'
 import { ToolNode } from '../components/ToolNode'
 import OperationControls from '../components/OperationControls'
+import ConfigPanel from '../components/ConfigPanel'
 import { useOperationStore } from '../stores/operationStore'
 import { toolSchemas, toolMap } from '../schemas'
 import type { ToolSchema } from '../schemas/types'
@@ -23,6 +24,7 @@ const nodeTypes = { toolNode: ToolNode }
 
 function OperationInner() {
   const [availableTools, setAvailableTools] = useState<ToolSchema[]>([])
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
 
   const { nodes, edges, onNodesChange, onEdgesChange, addEdge, addNode, status } =
     useOperationStore()
@@ -122,6 +124,8 @@ function OperationInner() {
           onConnect={handleConnect}
           onDragOver={handleDragOver}
           onDrop={handleDrop}
+          onNodeClick={(_event, node) => setSelectedNodeId(node.id)}
+          onPaneClick={() => setSelectedNodeId(null)}
           nodeTypes={nodeTypes}
           fitView
         >
@@ -145,6 +149,14 @@ function OperationInner() {
           />
         </div>
       </div>
+
+      {/* Config panel */}
+      {selectedNodeId && (
+        <ConfigPanel
+          nodeId={selectedNodeId}
+          onClose={() => setSelectedNodeId(null)}
+        />
+      )}
     </div>
   )
 }
