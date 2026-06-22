@@ -69,6 +69,7 @@ interface ToolSidebarProps {
 ```
 
 Responsibilities:
+
 - Groups tools by category using a mapping from schema `Category` to display labels ("Reconnaissance" → "Active Recon", "Exploitation" → "Exploit Modules", "Analysis" → "Credential Harvesting")
 - Renders each tool as a draggable item with `draggable="true"`
 - Sets `event.dataTransfer.setData('application/crackntty-tool', toolId)` on dragStart
@@ -89,6 +90,7 @@ type ToolNodeData = {
 ```
 
 Responsibilities:
+
 - Renders tool icon (emoji from schema), name, category badge
 - Shows status indicator: colored dot (gray=idle, blue-pulse=running, green=completed, red=failed)
 - Left `Handle` with type="target", right `Handle` with type="source"
@@ -107,6 +109,7 @@ interface OperationControlsProps {
 ```
 
 Responsibilities:
+
 - "Execute Operation" button: red background (#dc2626), white text, disabled during EXECUTING
 - Status badge: pill-shaped with status text and color coding (IDLE=slate, ARMING=amber, EXECUTING=red pulse)
 - Positioned absolutely in top-right of canvas area
@@ -118,6 +121,7 @@ Responsibilities:
 ```
 
 Responsibilities:
+
 - Horizontal flex layout: Sidebar (fixed 250px) | Canvas (flex-1)
 - Houses the ReactFlow provider and canvas instance
 - Manages `onDragOver`, `onDrop`, `onConnect` handlers
@@ -151,6 +155,7 @@ interface OperationState {
 ```
 
 Responsibilities:
+
 - Central state for the pipeline graph (nodes + edges)
 - Integrates with React Flow's change handlers via `applyNodeChanges` / `applyEdgeChanges`
 - `executeOperation()`: runs topological sort, iterates nodes in order, invokes Tauri `execute_tool`, listens to status events, updates node statuses
@@ -209,6 +214,7 @@ Note: ARMING is reserved for future use when pre-execution validation or configu
 ## Testing Strategy
 
 Property-based testing is **not applicable** for this feature. The Operation View is primarily a UI composition layer integrating React Flow components with Tauri IPC. The logic is:
+
 - React event handlers (drag/drop) — tested with example-based interaction tests
 - React Flow API wrappers (addEdge, removeNodes) — thin pass-throughs
 - Zustand state transitions — tested with example-based unit tests
@@ -217,6 +223,7 @@ Property-based testing is **not applicable** for this feature. The Operation Vie
 The one pure algorithm (topological sort in `src/lib/pipeline.ts`) is already implemented and would be a candidate for PBT, but it's existing code outside this feature's scope.
 
 **Testing approach:**
+
 - **Unit tests**: Verify store actions (addNode, removeNode, duplicateNode, updateNodeStatus, status transitions)
 - **Component tests**: Verify sidebar renders correct tools, ToolNode renders all elements, drag/drop creates nodes
 - **Integration tests**: Mock Tauri invoke to test execution flow end-to-end

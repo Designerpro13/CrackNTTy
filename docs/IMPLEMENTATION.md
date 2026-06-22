@@ -10,6 +10,7 @@
 ## Status: Scaffolding Complete
 
 What's done:
+
 - [x] Tauri + React + TypeScript + Tailwind project initialized
 - [x] 4-view navigation shell (Arsenal, Operation, CLI-Logs, Targets)
 - [x] Tool schemas for all 7 MVP tools (nmap, gobuster, nikto, hydra, john, netcat, curl)
@@ -20,6 +21,7 @@ What's done:
 - [x] Pipeline DAG utilities (topological sort, variable resolution)
 
 What's next (implementation in Kiro IDE):
+
 - [ ] Task 3: Arsenal View UI
 - [ ] Task 5: Operation View (React Flow canvas)
 - [ ] Task 6: Config Side Panel
@@ -36,6 +38,7 @@ What's next (implementation in Kiro IDE):
 **File:** `src/views/Arsenal.tsx`
 
 **Requirements:**
+
 - Import `toolSchemas` from `../schemas`
 - Display tool cards in a responsive grid (4 cols on large screens)
 - Each card: icon (top-left), category tag (top-right), name, description, status (Active ●/Idle ○), "Configure →"
@@ -53,6 +56,7 @@ What's next (implementation in Kiro IDE):
 **File:** `src/views/Operation.tsx`
 
 **Requirements:**
+
 - Left sidebar (~250px): categorized tool list (draggable items)
   - Categories: "Active Recon", "Exploit Modules", "Credential Harvesting"
   - Only tools with `status: 'active'` shown
@@ -69,12 +73,14 @@ What's next (implementation in Kiro IDE):
 - Canvas controls: MiniMap, zoom buttons, pan tool
 
 **Key imports:**
+
 ```tsx
 import { ReactFlow, Background, Controls, MiniMap, useNodesState, useEdgesState, addEdge } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 ```
 
 **Node data structure:**
+
 ```ts
 type ToolNodeData = {
   toolId: string
@@ -91,6 +97,7 @@ type ToolNodeData = {
 **File:** `src/components/ConfigPanel.tsx`
 
 **Requirements:**
+
 - Renders when a node is selected (use React Flow's `onNodeClick`)
 - Right-side panel (~350px), slides in with transition
 - Header: tool icon + name + "×" close button
@@ -116,6 +123,7 @@ type ToolNodeData = {
 **File:** `src/lib/executePipeline.ts`
 
 **Flow:**
+
 1. Get all nodes + edges from React Flow
 2. Call `topologicalSort(nodes, edges)` → execution order
 3. For each node in order:
@@ -129,6 +137,7 @@ type ToolNodeData = {
 4. Update global status: IDLE → ARMING → EXECUTING → IDLE
 
 **Tauri event listening:**
+
 ```ts
 import { listen } from '@tauri-apps/api/event'
 
@@ -144,6 +153,7 @@ const unlisten = await listen<OutputEvent>(`tool-output-${id}`, (event) => {
 **File:** `src/views/CliLogs.tsx`
 
 **Layout (3-column):**
+
 - Left sidebar (~220px):
   - Stream Filters: checkboxes for INFO ☑️ (count), WARN ☑️ (count), EXPLOIT ☑️ (count)
   - Grep input: `<input placeholder="Grep pattern...">`
@@ -168,6 +178,7 @@ const unlisten = await listen<OutputEvent>(`tool-output-${id}`, (event) => {
 **File:** `src/views/Targets.tsx`
 
 **Layout:**
+
 - Header: "Active Engagements" + subtitle "Monitoring X nodes across Y subnets"
 - Top bar: Filter button + "+ Add Target" button
 - Main: responsive card grid
@@ -189,6 +200,7 @@ const unlisten = await listen<OutputEvent>(`tool-output-${id}`, (event) => {
 **Files:** `src/lib/persistence.ts` + Tauri filesystem commands
 
 **Workflow save format (`~/.crackntt/workflows/{name}.json`):**
+
 ```json
 {
   "name": "web_recon",
@@ -200,6 +212,7 @@ const unlisten = await listen<OutputEvent>(`tool-output-${id}`, (event) => {
 ```
 
 **Settings (`~/.crackntt/settings.json`):**
+
 ```json
 {
   "toolPaths": { "nmap": "/usr/bin/nmap", ... },
@@ -215,6 +228,7 @@ Use Tauri's `fs` plugin or `invoke` commands to read/write these files.
 ## Design System (from mockups)
 
 **Colors:**
+
 - Background: `#0f1117` (main), `#131620` (nav/sidebars)
 - Cards: `#1a1f2e` with `border-slate-700`
 - Text: `#e2e8f0` (primary), `#94a3b8` (secondary)
@@ -222,11 +236,13 @@ Use Tauri's `fs` plugin or `invoke` commands to read/write these files.
 - Status badges: orange=Vulnerable, green=Scanned, blue=Monitored
 
 **Typography:**
+
 - UI: Inter/system sans-serif
 - Terminal/code: JetBrains Mono / monospace
 - Headings: font-bold, tracking-tight
 
 **Components:**
+
 - Cards: rounded-lg, subtle border, hover:shadow-lg transition
 - Buttons: rounded-md, font-medium, px-4 py-2
 - Inputs: bg-slate-800, border-slate-700, focus:border-blue-500
